@@ -1,0 +1,15 @@
+jupyter
+nltk
+pandas
+numpy
+matplotlib
+seaborn
+pdfminer
+gensim
+csv
+
+requests
+googletrans
+translate
+bs4
+
