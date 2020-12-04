@@ -3,8 +3,6 @@ from os.path import dirname
 import os.path
 from dotenv import load_dotenv
 
-print("im in init.py")
-
 version_file = '{}/version.txt'.format(dirname(__file__))
 
 if isfile(version_file):
