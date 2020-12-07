@@ -73,11 +73,6 @@ def stem(tokenized_text):
     stemmer = PorterStemmer()
     return [stemmer.stem(word) for word in tokenized_text]
 
-def dealroom_phrase_removal(text):
-    dealroom_phrase = r"Here you'll find information about their funding, investors and team."
-    if dealroom_phrase in text:
-        text = re.sub(dealroom_phrase, "", text)
-    return text
 
 @simple_time_tracker
 def text_preprocessing(text):
@@ -101,3 +96,17 @@ def text_preprocessing(text):
     #can add either stem or lemmatize
 
     return tokenized_text
+
+
+#########################################################################
+
+# used in data preparation (as it needs the name from the Dealroom data)
+def remove_own_name(text, name):
+    return re.sub(name, "", text)
+
+# unused
+def dealroom_phrase_removal(text):
+    dealroom_phrase = r"Here you'll find information about their funding, investors and team."
+    if dealroom_phrase in text:
+        text = re.sub(dealroom_phrase, "", text)
+    return text

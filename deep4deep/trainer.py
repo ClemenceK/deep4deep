@@ -111,13 +111,13 @@ def demo():
     # demo routine
     my_path = path.join(path.dirname(path.dirname(__file__)), "raw_data", "data2020-12-03.csv")
 
-    recu_train, recu_test = train_test_split(read_csv(my_path), test_size = .25)
+    recu_train, recu_test = train_test_split(pd.read_csv(my_path), test_size = .25)
 
-    train, test = train_test_split(recu_train, test_size = .25)
+    train, val = train_test_split(recu_train, test_size = .25)
     X_train_main_module = train.drop(columns=['target'])
     y_train=train['target']
-    X_val_main_module = train.drop(columns=['target'])
-    y_val=train['target']
+    X_val_main_module = val.drop(columns=['target'])
+    y_val=val['target']
 
     lstm_trainer = LSTM_Meta_Trainer()
     lstm_trainer.lstm_training(X_train_main_module, X_val_main_module, y_train,y_val)
