@@ -16,3 +16,5 @@ def simple_time_tracker(method):
             print(method.__name__, round(te - ts, 2))
         return result
     return timed
+
+
