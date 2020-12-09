@@ -19,7 +19,6 @@ def remove_numbers(text):
     """
     return ''.join(char for char in text if not char.isdigit())
 
-
 def remove_punctuation(text):
     """
     removes punctuation from text
@@ -33,7 +32,7 @@ def remove_punctuation(text):
     return text
 
 def remove_special_chars(text):
-    return regex.sub(r'\p{So}+', '', text)
+    return regex.sub(r'\p{So}+', ' ', text)
 
 def remove_accents(text):
     return unidecode.unidecode(text)

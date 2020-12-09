@@ -40,10 +40,6 @@ EMBEDDING = "glove-wiki-gigaword-50"
 #EMBEDDING = get_embedding()
 
 
-def change_to_categorical(my_df):
-    my_df_categorical = my_df[my_df['target']!=0.5].copy()
-    return my_df_categorical
-
 @simple_time_tracker
 def pad_X(X, dtype='float32'):
     X_pad = pad_sequences(X,

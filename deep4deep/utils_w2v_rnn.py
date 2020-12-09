@@ -65,7 +65,7 @@ def my_metrics(X_val_check):
     print(f"{round(accuracy*100)}\t{round(precision*100)}\t{round(recall*100)}\t{round( f1*100)}")
     return {"accuracy": accuracy,"precision": precision,"recall": recall, "f1": f1 }
 
-
+@simple_time_tracker
 def plot_loss_accuracy(history):
     plt.plot(history.history['loss'])
     plt.plot(history.history['val_loss'])
@@ -85,6 +85,7 @@ def plot_loss_accuracy(history):
 
     return None
 
+@simple_time_tracker
 def rmse(X_val, y_val, model):
     y_pred = model.predict(X_val)
     model_rmse = ((y_val - y_pred[:,0])**2).mean()**0.5
