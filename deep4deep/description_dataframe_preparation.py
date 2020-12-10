@@ -31,7 +31,6 @@ def change_to_categorical(my_df):
     my_df_categorical = my_df[my_df['target']!=0.5].copy()
     return my_df_categorical
 
-@simple_time_tracker
 def data_prep(file_path = path.join(path.dirname(path.dirname(__file__)),"raw_data", "my_df_with_metatags.csv")):
     '''
     file_path: path to a file with descriptions/metadata (obtained by the above described process)

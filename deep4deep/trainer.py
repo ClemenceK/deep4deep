@@ -1,7 +1,7 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from os import path
-import joblib
+from tensorflow import keras
 
 
 
@@ -15,9 +15,8 @@ from deep4deep import utils_w2v_rnn
 
 def merge_df (df_from_main_module, my_df_meta_categorical):
     '''
-    returns a tuple (df_with, df_without) where:
+    returns df_with where:
     df_with has only df_from_main_module rows that were present in my_df_meta_categorical (ie where text was retrieved) and all columns from my_df_meta_categorical
-    df_without has only df_from_main_module rows that were absent from my_df_meta_categorical, and only the id columns)
     '''
     # both have id as col (not index)
     df_from_main_module = df_from_main_module[['id']] # keep no other col
@@ -28,13 +27,12 @@ def merge_df (df_from_main_module, my_df_meta_categorical):
 
 class LSTM_Meta_Trainer():
 
-    def __init__(self):
+    def __init__(self, preprocessor, embedder):
         print("initializing Trainer")
         self.df_meta_categorical = data_prep()
         self.model = LstmModel()
-        self.preprocessor = Preprocessor()
-        print("downloading class transfer learning embedder – this may take time, coffee break maybe?")
-        self.embedder = Embedder()
+        self.preprocessor = preprocessor
+        self.embedder = embedder
 
     @simple_time_tracker
     def lstm_training(self, train_set, val_set):
@@ -79,7 +77,6 @@ class LSTM_Meta_Trainer():
 
         return self.model
 
-    @simple_time_tracker
     def lstm_predict(self, X_test_from_main_module):
         '''
         returns a dataframe of Dealroom ids and predictions of being deeptech, based on description text,
@@ -104,32 +101,52 @@ class LSTM_Meta_Trainer():
         X_test_return = X_test_from_main_module.merge(X_test_with[['id','full_text', 'y_pred']], on='id', how='left')
         return X_test_return
 
-    def save_as_joblib(target_file="deeptech_NLP_model.joblib"):
+    def save_model(self, target_file="deeptech_NLP_model"):
         '''
         save preferentially after a final training on all data available
         '''
-        print(f"model will be saved as {target_file}")
-        return joblib.dump(self.model, target_file)
+        return self.model.model.save(target_file)
+        #to later load: model = keras.models.load_model('path/to/model')
 
 
 def demo():
     # demo routine
-    my_path = path.join(path.dirname(path.dirname(__file__)), "raw_data", "data2020-12-03.csv")
 
-    df = pd.read_csv(my_path)
+    # data preparation
+    #my_path = path.join(path.dirname(path.dirname(__file__)), "raw_data", "data2020-12-03.csv")
+    #df = pd.read_csv(my_path)
+    #train_set, val_set = train_test_split(recu_train, test_size = .2)
+    #train_set, val_set = train_test_split(recu_train, test_size = .2)
 
-    recu_train, recu_test = train_test_split(df, test_size = .25)
+    # data preparation
+    my_path = path.join(path.dirname(path.dirname(__file__)), "raw_data", "data_cross_val", "")
+    i=""
+    X_train_set = pd.read_csv(my_path+"X_test"+i+".csv", index_col=0)
+    y_train_set = pd.read_csv(my_path+"y_test"+i+".csv", index_col=0)
+    print(X_train_set.head())
+    print(y_train_set.head())
 
-    train_set, val_set = train_test_split(recu_train, test_size = .25)
+    train_set = X_train_set.copy()
+    train_set['target'] = y_train_set
+    print(train_set.head())
 
-    lstm_trainer = LSTM_Meta_Trainer()
+    return None
+
+    '''
+    # instanciations
+    preprocessor = Preprocessor()
+    embedder = Embedder()
+
+    lstm_trainer = LSTM_Meta_Trainer(preprocessor, embedder)
     lstm_trainer.lstm_training(train_set, val_set)
 
-    lstm_trainer.lstm_predict(recu_test.drop(columns=['target']))
+    results = lstm_trainer.lstm_predict(recu_test.drop(columns=['target']))
+    print(results[['name', 'full_text', 'y_pred']])
 
-    lstm_trainer.save_as_joblib()
+    lstm_trainer.save_model()
 
-    return lstm_trainer
+    return results
+    '''
 
 
 if __name__ == '__main__':

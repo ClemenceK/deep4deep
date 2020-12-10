@@ -5,9 +5,9 @@ import unidecode
 from nltk.corpus import stopwords
 from nltk import word_tokenize
 from nltk.stem import WordNetLemmatizer, PorterStemmer
-import re
+import regex
 
-from deep4deep.utils import simple_time_tracker
+#from deep4deep.utils import simple_time_tracker
 
 
 
@@ -73,7 +73,6 @@ def stem(tokenized_text):
     return [stemmer.stem(word) for word in tokenized_text]
 
 
-@simple_time_tracker
 def text_preprocessing(text):
     """
     applies preprocessing steps

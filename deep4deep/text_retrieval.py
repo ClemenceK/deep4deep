@@ -1,4 +1,3 @@
-
 import requests
 from bs4 import BeautifulSoup
 import re
@@ -9,9 +8,15 @@ import pandas as pd
 from deep4deep.utils import simple_time_tracker
 from deep4deep.text_processing import text_preprocessing, remove_own_name
 from deep4deep.utils import simple_time_tracker
+from dotenv import load_dotenv
 
 
 import ast
+
+
+env_path = path.join(path.dirname(path.dirname(__file__)), '.env') # ../.env
+load_dotenv(dotenv_path=env_path)
+
 
 #  @simple_time_tracker
 def get_dealroom_meta_description(row):

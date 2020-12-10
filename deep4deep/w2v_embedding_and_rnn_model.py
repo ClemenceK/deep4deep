@@ -2,11 +2,10 @@ import pandas as pd
 import numpy as np
 import csv
 import matplotlib.pyplot as plt
-
-
-
 import gensim.downloader as api
-from gensim.models import Word2Vec
+
+
+#from gensim.models import Word2Vec
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras import models, layers
@@ -15,32 +14,16 @@ from tensorflow.keras.callbacks import EarlyStopping
 from sklearn.base import TransformerMixin, BaseEstimator
 
 
-from deep4deep.text_retrieval import prepare_my_df, get_meta_description_columns
+#from deep4deep.text_retrieval import prepare_my_df, get_meta_description_columns
 from deep4deep.text_processing import text_preprocessing
-from deep4deep.utils import simple_time_tracker
+#from deep4deep.utils import simple_time_tracker
 
 MASK_VALUE = -100
-EMBEDDING = "glove-wiki-gigaword-50"
-
-# #TODO remove
-# def get_embedding():
-#     try:
-#         if EMBEDDING == None:
-#             print("it was None, I'm downloading it yet again!")
-#             EMBEDDING = api.load("glove-wiki-gigaword-50")
-#         return EMBEDDING
-#     except:
-#         print("it was not defined, I'm downloading it yet again!")
-
-#         EMBEDDING = api.load("glove-wiki-gigaword-50")
-
-#         return EMBEDDING
+EMBEDDING = "glove-wiki-gigaword-300"
+# glove-wiki-gigaword-300
+# also tried glove-twitter-200, not better
 
 
-#EMBEDDING = get_embedding()
-
-
-@simple_time_tracker
 def pad_X(X, dtype='float32'):
     X_pad = pad_sequences(X,
                   dtype=dtype,
@@ -48,7 +31,6 @@ def pad_X(X, dtype='float32'):
                   value=MASK_VALUE)
     return X_pad
 
-@simple_time_tracker
 def init_and_compile_model():
     # –– Initialization
     model = models.Sequential()
@@ -91,14 +73,12 @@ class Embedder(TransformerMixin, BaseEstimator):
         """define parameters useful for fit and transform"""
         print("initializing Embedder")
         self.history = None
-        self.embedding = api.load("glove-wiki-gigaword-300")
-        #Downloads the corpus, unless it is already cached on your local machine
-        # glove-wiki-gigaword-300
-        # also tried glove-twitter-200, not better
-        # there exists one with patents (patent2017 or something), that comes from elsewhere (search online)
-        # to be tested if you work on patents
+        print("downloading class transfer learning embedder – this may take time, coffee break maybe?")
+        self.embedding = api.load(EMBEDDING)
+        # Downloads the corpus, unless it is already cached on your local machine
+        # then loads it (can still take a few minutes)
 
-    @simple_time_tracker
+
     def embed_text(self, tokenized_text):
         result = []
         for word in tokenized_text:
@@ -132,25 +112,23 @@ class LstmModel(TransformerMixin, BaseEstimator):
         self.model = init_and_compile_model()
         self.es = EarlyStopping(patience=15, restore_best_weights=True)
 
-    @simple_time_tracker
     def fit(self, X, y, X_val, y_val):
         X_pad = pad_X(X)
         X_val =  pad_X(X_val)
         self.history = self.model.fit(X_pad, y, epochs= 500, batch_size=64, callbacks=[self.es], validation_data=(X_val, y_val))
         return self
 
-    @simple_time_tracker
     def predict(self, X):
-        # need to prepocess and embed X
+        # need to prepocess and embed X (done in parent's predictor)
         X_pad = pad_X(X, dtype='float32')
         y = self.model.predict(X_pad)
         return y
 
 
-if __name__ == "__main__":
+#if __name__ == "__main__":
 
     # initial df
-    my_df = prepare_my_df(df)
-    my_df = get_meta_description_columns(my_df)
+    #my_df = prepare_my_df(df)
+    #my_df = get_meta_description_columns(my_df)
 
     # Importing meta-descriptions from websites and preprocessing
