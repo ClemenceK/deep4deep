@@ -108,6 +108,20 @@ class LSTM_Meta_Trainer():
         return self.model.model.save(target_file)
         #to later load: model = keras.models.load_model('path/to/model')
 
+def from_Cathsfile_to_mine(my_path, i=""):
+    # data preparation
+    X_train_set = pd.read_csv(my_path+"X_test"+i+".csv", index_col=0)
+    y_train_set = pd.read_csv(my_path+"y_test"+i+".csv", index_col=0)
+
+    train_set = X_train_set.copy()
+    train_set['target'] = y_train_set
+
+    X_val_set = pd.read_csv(my_path+"X_test"+i+".csv", index_col=0)
+    y_val_set = pd.read_csv(my_path+"y_test"+i+".csv", index_col=0)
+
+    val_set = X_val_set.copy()
+    val_set['target'] = y_val_set
+    return train_set, val_set
 
 def demo():
     # demo routine
@@ -115,38 +129,50 @@ def demo():
     # data preparation
     #my_path = path.join(path.dirname(path.dirname(__file__)), "raw_data", "data2020-12-03.csv")
     #df = pd.read_csv(my_path)
-    #train_set, val_set = train_test_split(recu_train, test_size = .2)
+    #train_set, test_set = train_test_split(recu_train, test_size = .2)
     #train_set, val_set = train_test_split(recu_train, test_size = .2)
 
-    # data preparation
+    # saving for score evaluation
     my_path = path.join(path.dirname(path.dirname(__file__)), "raw_data", "data_cross_val", "")
-    i=""
-    X_train_set = pd.read_csv(my_path+"X_test"+i+".csv", index_col=0)
-    y_train_set = pd.read_csv(my_path+"y_test"+i+".csv", index_col=0)
-    print(X_train_set.head())
-    print(y_train_set.head())
 
-    train_set = X_train_set.copy()
-    train_set['target'] = y_train_set
-    print(train_set.head())
+    train_set_1, val_set_1 = from_Cathsfile_to_mine("")
+    train_set_2, val_set_2 = from_Cathsfile_to_mine("2")
+    train_set_3, val_set_3 = from_Cathsfile_to_mine("3")
 
-    return None
-
-    '''
     # instanciations
     preprocessor = Preprocessor()
     embedder = Embedder()
 
     lstm_trainer = LSTM_Meta_Trainer(preprocessor, embedder)
-    lstm_trainer.lstm_training(train_set, val_set)
 
-    results = lstm_trainer.lstm_predict(recu_test.drop(columns=['target']))
-    print(results[['name', 'full_text', 'y_pred']])
+    #0
+    train_set_1, early_stop_val_set_1 = train_test_split(train_set_1, test_size = .2)
+    lstm_trainer.lstm_training(train_set_1, early_stop_val_set_1)
+
+    results_1 = lstm_trainer.lstm_predict(val_set_1)[['name', 'full_text', 'target','y_pred']]
+    results_1.rename(columns={'y_pred':'y_pred_NLP'}, inplace=True)
+    results_1.to_csv(my_path+"results_1.csv",index=False)
+
+    #2
+    train_set_2, early_stop_val_set_2 = train_test_split(train_set_2, test_size = .2)
+    lstm_trainer.lstm_training(train_set_2, early_stop_val_set_2)
+
+    results_2 = lstm_trainer.lstm_predict(val_set_2)[['name', 'full_text', 'target','y_pred']]
+    results_2.rename(columns={'y_pred':'y_pred_NLP'}, inplace=True)
+    results_2.to_csv(my_path+"results_2.csv",index=False)
+
+    #3
+    train_set_3, early_stop_val_set_3 = train_test_split(train_set_3, test_size = .3)
+    lstm_trainer.lstm_training(train_set_3, early_stop_val_set_3)
+
+    results_3 = lstm_trainer.lstm_predict(val_set_3)[['name', 'full_text', 'target','y_pred']]
+    results_3.rename(columns={'y_pred':'y_pred_NLP'}, inplace=True)
+    results_3.to_csv(my_path+"results_3.csv",index=False)
 
     lstm_trainer.save_model()
 
-    return results
-    '''
+    return results_1, results_2, results_3
+
 
 
 if __name__ == '__main__':

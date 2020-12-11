@@ -10,10 +10,10 @@ from deep4deep.utils import simple_time_tracker
 def make_X_check(X_val, y_val, X_val_check, model):
     '''
     arguments:
-    : a copy of a X_set with columns as prepared by
-    before any preprocessing or embedding
-    : the associated targets
-    : a model that can be applied to X_val to predict values for y
+    X_val: a preprocessed and embedded into vectors set
+    y_val: the associated targets
+    X_val_check: a copy of a X_set with columns as prepared, before any preprocessing or embedding
+    model: a model that can be applied to X_val to predict values for y
     returns:
     a dataframe with X_val_check's fields (for inspection) and
     confusion matrix values: true positives (TP), etc.
@@ -21,10 +21,30 @@ def make_X_check(X_val, y_val, X_val_check, model):
     threshold = .5
     X_val_check = pd.DataFrame(X_val_check)
     X_val_check['y_pred'] = model.predict(X_val)
-    X_val_check['y_true'] = y_val
+    X_val_check['target'] = y_val
     X_val_check['y_pred_binary'] = [1 if item >threshold else 0 for item in X_val_check.y_pred]
 
-    condition_target_1 = (X_val_check.y_true==1.0)
+    condition_target_1 = (X_val_check.target==1.0)
+    condition_pred_1 = (X_val_check.y_pred_binary==1)
+    X_val_check['TP'] = condition_target_1 & condition_pred_1
+    X_val_check['TN'] = ~condition_target_1 & ~condition_pred_1
+    X_val_check['FP'] = ~condition_target_1 & condition_pred_1
+    X_val_check['FN'] = condition_target_1 & ~condition_pred_1
+
+    return X_val_check
+
+def make_X_check2(X_val_check, name_for_y_pred='y_pred'):
+    '''
+    arguments:
+    df: a dataframe with 'target' and 'y_pred' (or name passed) values
+    returns:
+    a dataframe with X_val_check's fields (for inspection) and
+    confusion matrix values: true positives (TP), etc.
+    '''
+    threshold = .5
+    X_val_check['y_pred_binary'] = [1 if item >threshold else 0 for item in X_val_check[name_for_y_pred]]
+
+    condition_target_1 = (X_val_check.target==1.0)
     condition_pred_1 = (X_val_check.y_pred_binary==1)
     X_val_check['TP'] = condition_target_1 & condition_pred_1
     X_val_check['TN'] = ~condition_target_1 & ~condition_pred_1
@@ -51,7 +71,7 @@ def my_metrics(X_val_check):
     print(f"recall: {recall *100:.2f} %")
     print(f"f1: {f1 *100:.2f} %")
 
-    cm = confusion_matrix(X_val_check.y_true, X_val_check.y_pred_binary)
+    cm = confusion_matrix(X_val_check.target, X_val_check.y_pred_binary)
     disp = ConfusionMatrixDisplay(confusion_matrix=cm,
                               #display_labels=display_labels
                              )

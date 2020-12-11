@@ -44,20 +44,6 @@ class AAA():
 
 aaa = AAA()
 
-def common_parameters(loaded :bool = False, preprocessor: int = None, embedder: int = None, predictor: int = None):
-
-    print("😊 😊 😊 >>> LOADING WORD2VEC")
-
-    commons = {}
-    commons["loaded"] = loaded
-    commons["preprocessor"] = preprocessor
-    commons["embedder"] = embedder
-    commons["predictor"] = predictor
-
-    return commons
-
-
-
 app = FastAPI()
 
 app.add_middleware(
@@ -70,23 +56,6 @@ app.add_middleware(
 
 
 print("🍾 🍾 🍾 >>> APP created")
-
-@app.get("/items/")
-async def read_items():  # commons: dict = Depends(common_parameters)):
-
-    commons = aaa.load_stuff
-
-    loaded = commons["loaded"]
-    preprocessor = commons["preprocessor"]
-    embedder = commons["embedder"]
-    predictor = commons["predictor"]
-
-    print(loaded)
-    print(preprocessor)
-    print(embedder)
-    print(predictor)
-
-    return { "res" : True}
 
 @app.get("/")
 def index():
