@@ -18,43 +18,7 @@ env_path = path.join(path.dirname(path.dirname(__file__)), '.env') # ../.env
 load_dotenv(dotenv_path=env_path)
 
 
-#  @simple_time_tracker
-def get_dealroom_meta_description(row):
-    '''
-    given the dealroom page url (complete with http…),
-    returns the description from the meta tags
-    returns: the replacement row
-    '''
-    # take tagline and remove the company name
-    try:
-        description = remove_own_name(row['tagline'], row['name'])
-    except:
-        description = ""
-        print(f"there's a nan for {row['id']}: tagline is {row['tagline']}, name is {row['name']}; imputing an empty string")
-
-    return description # to be added in 'dealroom_meta_description' column
-
 #@simple_time_tracker
-def get_meta_description(row):
-    '''
-    given a my_df row,
-    scraps the description from the meta tags in website_url
-    returns: the replacement row
-    warning: use after creating column 'dealroom_meta_description'
-    '''
-
-    website = row['website_url']
-    try:
-        response = requests.get(website)
-        soup = BeautifulSoup(response.content, "html.parser")
-        description = soup.find("meta", property="og:description")["content"]
-        description = remove_own_name(description, row['name'])
-    except:
-        print(f"website {website} request threw an error")
-        description = " "# or: row['dealroom_meta_description'] (doubling the text)
-    return description # to be added in 'meta_description' column
-
-@simple_time_tracker
 def prepare_my_df(df):
     '''
     from raw data as provided by the extraction, returns a simpler dataframe
@@ -84,17 +48,38 @@ def prepare_my_df(df):
     #my_df['industries'] = my_df['industries'].map(lambda x: re.findall(r".+?'name': '([^']+)", x))
     return my_df
 
-@simple_time_tracker
+
+#@simple_time_tracker
+def get_meta_description(row):
+    '''
+    given a my_df row,
+    scraps the description from the meta tags in website_url
+    returns: the replacement row
+    '''
+
+    website = row['website_url']
+    try:
+        response = requests.get(website)
+        soup = BeautifulSoup(response.content, "html.parser")
+        description = soup.find("meta", property="og:description")["content"]
+        description = remove_own_name(description, row['name'])
+    except:
+        print(f"website {website} request threw an error")
+        description = " "
+    return description # to be added in 'meta_description' column by get_meta_description_columns
+
+
+#@simple_time_tracker
 def get_meta_description_columns(my_df, save_file_name="my_df_with_metatags.csv"):
     '''
     from a dataframe with ['name', 'tagline', website_url'] columns at least,
-    process dealroom tagline THEN scrape companies pages for meta description
+    copies the dealroom tagline then scrape companies pages for meta description
     returns a dataframe with new str columns:
     ['dealroom_meta_description']
     ['meta_description']
     '''
-    my_df.loc[:,'dealroom_meta_description'] = my_df.apply(get_dealroom_meta_description, axis = 1) #apply row by row
-    my_df.loc[:,'meta_description'] = my_df.apply(get_meta_description, axis = 1)
+    my_df.loc[:,'dealroom_meta_description'] = my_df.tagline
+    my_df.loc[:,'meta_description'] = my_df.apply(get_meta_description, axis = 1) #apply row by row
     my_df.to_csv(save_file_name)
     return my_df
 
@@ -111,14 +96,15 @@ if __name__ == '__main__':
 
 
 
-
-
-
 #####################################################################################
 #ununsed
 
+
 def read_my_df_with_metatags_csv(file_name):
-    # use only if you saved a df with prepreprocessed columns – change col names as needed
+    '''
+    To be used if you saved a df with prepreprocessed columns as csv
+    Change col names as needed
+    '''
     my_df = pd.read_csv(file_name)
     my_df['meta_description_preprocessed'] = my_df['meta_description_preprocessed'].apply\
                             (lambda string: list(ast.literal_eval(string)))
@@ -128,7 +114,9 @@ def read_my_df_with_metatags_csv(file_name):
     return my_df
 
 
-@simple_time_tracker
+
+
+#@simple_time_tracker
 def import_dealroom_news(company_id=214127, n_news=1):
     '''
     queries the Dealroom API for news and returns a clean string, in English,
@@ -183,3 +171,20 @@ def import_dealroom_news(company_id=214127, n_news=1):
     except:
         print(f"For {company_id}, the Dealroom news API returned no results")
         return ""
+
+#  @simple_time_tracker
+def get_dealroom_meta_description(row):
+    '''
+    given the dealroom page url (complete with http…),
+    returns the description from the meta tags
+    returns: the replacement row
+    '''
+    # take tagline and remove the company name
+    try:
+        description = remove_own_name(row['tagline'], row['name'])
+    except:
+        description = ""
+        print(f"there's a nan for {row['id']}: tagline is {row['tagline']}, name is {row['name']}; imputing an empty string")
+
+    return description # to be added in 'dealroom_meta_description' column
+
