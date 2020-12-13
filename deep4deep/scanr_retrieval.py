@@ -1,6 +1,7 @@
 import requests
 
 # unused
+
 # would be useful for a model focusing on French companies but
 # not for a model applicable to international companies
 

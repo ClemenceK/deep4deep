@@ -96,11 +96,11 @@ def text_preprocessing(text):
     return tokenized_text
 
 
-#########################################################################
-
 # used in data preparation (as it needs the name from the Dealroom data)
 def remove_own_name(text, name):
     return re.sub(name, "", text)
+
+#########################################################################
 
 # unused
 def dealroom_phrase_removal(text):

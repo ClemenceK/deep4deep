@@ -1,8 +1,8 @@
 FROM python:3.8.6-buster
 
 RUN pip install --upgrade pip
-COPY req.txt /req.txt
-RUN pip install -r req.txt
+COPY requirements_docker.txt /requirements_docker.txt
+RUN pip install -r requirements_docker.txt
 
 # COPY word2vec_loader.py /word2vec_loader.py
 # RUN python /word2vec_loader.py

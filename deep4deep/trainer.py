@@ -151,7 +151,7 @@ def demo():
     results_1 = lstm_trainer.lstm_predict(val_set_1)[['id', 'name', 'full_text', 'target','y_pred']]
     results_1.rename(columns={'y_pred':'y_pred_NLP'}, inplace=True)
 
-    results_1 = val_set_1[['id', 'name']].merge(results_1[['id', 'y_pred_NLP']], on='id', how='left')
+    results_1 = val_set_1[['id', 'name', 'target']].merge(results_1[['id', 'y_pred_NLP']], on='id', how='left')
     results_1.to_csv(my_path+"results_1.csv", index=False)
 
     #2
@@ -160,7 +160,7 @@ def demo():
 
     results_2 = lstm_trainer.lstm_predict(val_set_2)[['id', 'name', 'full_text', 'target','y_pred']]
     results_2.rename(columns={'y_pred':'y_pred_NLP'}, inplace=True)
-    results_2 = val_set_2[['id', 'name']].merge(results_2[['id', 'y_pred_NLP']], on='id', how='left')
+    results_2 = val_set_2[['id', 'name', 'target']].merge(results_2[['id', 'y_pred_NLP']], on='id', how='left')
     results_2.to_csv(my_path+"results_2.csv",index=False)
 
     #3
@@ -169,7 +169,7 @@ def demo():
 
     results_3 = lstm_trainer.lstm_predict(val_set_3)[['id', 'name', 'full_text', 'target','y_pred']]
     results_3.rename(columns={'y_pred':'y_pred_NLP'}, inplace=True)
-    results_3 = val_set_3[['id', 'name']].merge(results_3[['id', 'y_pred_NLP']], on='id', how='left')
+    results_3 = val_set_3[['id', 'name', 'target']].merge(results_3[['id', 'y_pred_NLP']], on='id', how='left')
     results_3.to_csv(my_path+"results_3.csv",index=False)
 
     lstm_trainer.save_model()

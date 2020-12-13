@@ -23,7 +23,8 @@ from deep4deep.utils import simple_time_tracker
 
 
 #===============================================================================
-    # If there is an existing file, use data_prep on that file
+    # If there is an existing csv obtained from the previous steps
+    # then directly use data_prep on that file
 
 
 
