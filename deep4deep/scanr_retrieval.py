@@ -1,5 +1,10 @@
 import requests
 
+# unused
+
+# would be useful for a model focusing on French companies but
+# not for a model applicable to international companies
+
 # API refs here: https://stackoverflow.com/questions/65106756/using-the-scanr-api-from-gouv-fr-for-a-post-request-that-given-a-company-name/65115927#65115927
 
 # For translation:

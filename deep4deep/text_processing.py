@@ -5,9 +5,9 @@ import unidecode
 from nltk.corpus import stopwords
 from nltk import word_tokenize
 from nltk.stem import WordNetLemmatizer, PorterStemmer
-import re
+import regex
 
-from deep4deep.utils import simple_time_tracker
+#from deep4deep.utils import simple_time_tracker
 
 
 
@@ -18,7 +18,6 @@ def remove_numbers(text):
     returns text without numbers as a string
     """
     return ''.join(char for char in text if not char.isdigit())
-
 
 def remove_punctuation(text):
     """
@@ -33,7 +32,7 @@ def remove_punctuation(text):
     return text
 
 def remove_special_chars(text):
-    return regex.sub(r'\p{So}+', '', text)
+    return regex.sub(r'\p{So}+', ' ', text)
 
 def remove_accents(text):
     return unidecode.unidecode(text)
@@ -73,13 +72,7 @@ def stem(tokenized_text):
     stemmer = PorterStemmer()
     return [stemmer.stem(word) for word in tokenized_text]
 
-def dealroom_phrase_removal(text):
-    dealroom_phrase = r"Here you'll find information about their funding, investors and team."
-    if dealroom_phrase in text:
-        text = re.sub(dealroom_phrase, "", text)
-    return text
 
-@simple_time_tracker
 def text_preprocessing(text):
     """
     applies preprocessing steps
@@ -101,3 +94,17 @@ def text_preprocessing(text):
     #can add either stem or lemmatize
 
     return tokenized_text
+
+
+# used in data preparation (as it needs the name from the Dealroom data)
+def remove_own_name(text, name):
+    return re.sub(name, "", text)
+
+#########################################################################
+
+# unused
+def dealroom_phrase_removal(text):
+    dealroom_phrase = r"Here you'll find information about their funding, investors and team."
+    if dealroom_phrase in text:
+        text = re.sub(dealroom_phrase, "", text)
+    return text

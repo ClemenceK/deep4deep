@@ -1,0 +1,17 @@
+gensim
+fastapi
+uvicorn
+joblib
+tensorflow
+pandas
+numpy
+requests
+sklearn
+unidecode
+matplotlib
+regex
+nltk
+bs4
+memoized_property
+
+
