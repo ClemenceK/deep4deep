@@ -37,12 +37,12 @@ class LSTM_Meta_Trainer():
     @simple_time_tracker
     def lstm_training(self, train_set, val_set):
         '''
-        train_set, val_set are received from the main module bpifrance_deeptech_analysis
-        and are used to make:
-        - our X through the lists of dealroom ids,
+        train_set, val_set are typically received from main module bpifrance_deeptech_analysis
+        and are used to build:
+        - our X through the lists of dealroom ids, using our text data,
         - the corresponding y
-        lstm_training:
-        Trains the instance's model
+        val_set is used it for early stopping and to print scoring evaluations
+        The function trains the instance's model
         Returns the model
         '''
         train_with = merge_df(train_set, self.df_meta_categorical)
@@ -72,7 +72,7 @@ class LSTM_Meta_Trainer():
         #provide feedback and metrics
         X_val_check = utils_w2v_rnn.make_X_check(X_val_ok, y_val_ok, X_val_check, self.model)
         utils_w2v_rnn.my_metrics(X_val_check)
-        utils_w2v_rnn.rmse(X_val_ok, y_val_ok, self.model)
+        #utils_w2v_rnn.rmse(X_val_ok, y_val_ok, self.model)
         utils_w2v_rnn.plot_loss_accuracy(self.model.history)
 
         return self.model
@@ -108,6 +108,37 @@ class LSTM_Meta_Trainer():
         return self.model.model.save(target_file)
         #to later load: model = keras.models.load_model('path/to/model')
 
+def main_trainer():
+    '''
+    Trains a model by reading the ./raw_data/data2020-12-03.csv dataset
+    (a file from the main model, with Dealroom data extracted through the API)
+    using its own set of text data (./raw_data/)
+    based on the my_df_with_metatags.csv file.
+    Can be used to re-train the model on an updated set of data.
+    '''
+
+    # data preparation
+    my_path = path.join(path.dirname(path.dirname(__file__)), "raw_data", "data2020-12-03.csv")
+    df = pd.read_csv(my_path)
+    # using minimum val size here, just to enable Early_stopping,
+    # as hyperparameters tuning has already been done.
+    train, val = train_test_split(df, test_size = .10)
+
+
+    # instanciations
+    preprocessor = Preprocessor()
+    embedder = Embedder()
+    lstm_trainer = LSTM_Meta_Trainer(preprocessor, embedder)
+
+
+    lstm_trainer.lstm_training(train, val)
+
+    # saving the trained model
+    lstm_trainer.save_model()
+
+    return lstm_trainer
+
+
 def from_Cathsfile_to_mine(my_path, i=""):
     # data preparation
     X_train_set = pd.read_csv(my_path+"X_test"+i+".csv", index_col=0)
@@ -123,16 +154,13 @@ def from_Cathsfile_to_mine(my_path, i=""):
     val_set['target'] = y_val_set
     return train_set, val_set
 
-def demo():
-    # demo routine
-
-    # data preparation
-    #my_path = path.join(path.dirname(path.dirname(__file__)), "raw_data", "data2020-12-03.csv")
-    #df = pd.read_csv(my_path)
-    #train_set, test_set = train_test_split(recu_train, test_size = .2)
-    #train_set, val_set = train_test_split(recu_train, test_size = .2)
-
-    # saving for score evaluation
+def preparing_results():
+    '''
+    Prepares the files results_1, results_2, results_3 for scoring
+    thrice the combination of the two models (main model + NLP model)
+    as done in the notebook Scoring_the_models.ipynb
+    Used just once to prepare those files.
+    '''
     my_path = path.join(path.dirname(path.dirname(__file__)), "raw_data", "data_cross_val", "")
 
     train_set_1, val_set_1 = from_Cathsfile_to_mine(my_path, "")
@@ -142,9 +170,9 @@ def demo():
     # instanciations
     preprocessor = Preprocessor()
     embedder = Embedder()
-
     lstm_trainer = LSTM_Meta_Trainer(preprocessor, embedder)
-    #0
+
+    #1
     train_train_set_1, early_stop_val_set_1 = train_test_split(train_set_1, test_size = .2)
     lstm_trainer.lstm_training(train_train_set_1, early_stop_val_set_1)
 
@@ -152,6 +180,7 @@ def demo():
     results_1.rename(columns={'y_pred':'y_pred_NLP'}, inplace=True)
 
     results_1 = val_set_1[['id', 'name', 'target']].merge(results_1[['id', 'y_pred_NLP']], on='id', how='left')
+    # saving for score evaluation
     results_1.to_csv(my_path+"results_1.csv", index=False)
 
     #2
@@ -161,6 +190,7 @@ def demo():
     results_2 = lstm_trainer.lstm_predict(val_set_2)[['id', 'name', 'full_text', 'target','y_pred']]
     results_2.rename(columns={'y_pred':'y_pred_NLP'}, inplace=True)
     results_2 = val_set_2[['id', 'name', 'target']].merge(results_2[['id', 'y_pred_NLP']], on='id', how='left')
+    # saving for score evaluation
     results_2.to_csv(my_path+"results_2.csv",index=False)
 
     #3
@@ -170,20 +200,12 @@ def demo():
     results_3 = lstm_trainer.lstm_predict(val_set_3)[['id', 'name', 'full_text', 'target','y_pred']]
     results_3.rename(columns={'y_pred':'y_pred_NLP'}, inplace=True)
     results_3 = val_set_3[['id', 'name', 'target']].merge(results_3[['id', 'y_pred_NLP']], on='id', how='left')
+    # saving for score evaluation
     results_3.to_csv(my_path+"results_3.csv",index=False)
-
-    lstm_trainer.save_model()
 
     return results_1, results_2, results_3
 
 
-
 if __name__ == '__main__':
 
-    demo()
-
-    # usage pour Cath:
-
-    # me passer son X_train, y_train, X_val, y_val pour entraînement
-    # me passer son X_test pour prédiction à "moyenner" avec la sienne
-    # refaire son calcul de perf à partir de ça
+    main_trainer()
