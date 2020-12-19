@@ -60,6 +60,7 @@ def get_meta_description(row):
     website = row['website_url']
     # disabling warning for SSL vertificate, printing a note instead
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+    # ⚠️⚠️⚠️ We don't think there is a securoty issue in this scraping, but if you disagree, remove these lines.
     try:
         try :
             response = requests.get(website)
@@ -77,7 +78,7 @@ def get_meta_description(row):
         description = description["content"] if description else ""
         description = remove_own_name(description, row['name'])
     except:
-        print(f"website {website} request threw an error")
+        print(f"website {website} request threw an error\n")
         description = " "
     return description # to be added in 'meta_description' column by get_meta_description_columns
 
