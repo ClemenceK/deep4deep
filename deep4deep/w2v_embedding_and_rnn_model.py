@@ -73,7 +73,7 @@ class Embedder(TransformerMixin, BaseEstimator):
         """define parameters useful for fit and transform"""
         print("initializing Embedder")
         self.history = None
-        print("downloading class transfer learning embedder – this may take time, coffee break maybe?")
+        print(f"downloading transfer learning embedder {EMBEDDING} – this may take time… coffee break? ☕️☕️☕️")
         self.embedding = api.load(EMBEDDING)
         # Downloads the corpus, unless it is already cached on your local machine
         # then loads it (can still take a few minutes)

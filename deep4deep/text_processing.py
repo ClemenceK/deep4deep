@@ -1,11 +1,11 @@
 import numpy
 import string
 import regex
+import re
 import unidecode
 from nltk.corpus import stopwords
 from nltk import word_tokenize
 from nltk.stem import WordNetLemmatizer, PorterStemmer
-import regex
 
 #from deep4deep.utils import simple_time_tracker
 
@@ -98,7 +98,7 @@ def text_preprocessing(text):
 
 # used in data preparation (as it needs the name from the Dealroom data)
 def remove_own_name(text, name):
-    return re.sub(name, "", text)
+    return text.replace(name, "") #regex.sub(name, "", text)
 
 #########################################################################
 

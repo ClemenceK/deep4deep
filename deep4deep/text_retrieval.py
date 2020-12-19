@@ -10,6 +10,7 @@ from deep4deep.text_processing import text_preprocessing, remove_own_name
 from deep4deep.utils import simple_time_tracker
 from dotenv import load_dotenv
 
+import urllib3
 
 import ast
 
@@ -56,12 +57,24 @@ def get_meta_description(row):
     scraps the description from the meta tags in website_url
     returns: the replacement row
     '''
-
     website = row['website_url']
+    # disabling warning for SSL vertificate, printing a note instead
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
     try:
-        response = requests.get(website)
+        try :
+            response = requests.get(website)
+        except:
+            print(f"{website} threw an error, trying again without SSL security certificate")
+            response = requests.get(website, verify=False)
+            # verify = False makes that we don't check the site SSL certificate
+            # it allows more sites to respond.
+            # eg https://netri.fr/ ca be scraped only with this option (at time of writing)
+            # I don't believe there is a security threat there,
+            # but we still limit the number of sites we use it for
         soup = BeautifulSoup(response.content, "html.parser")
-        description = soup.find("meta", property="og:description")["content"]
+        #description = soup.find("meta", property="og:description")["content"]
+        description = soup.find('meta', attrs={'name': 'description'})
+        description = description["content"] if description else ""
         description = remove_own_name(description, row['name'])
     except:
         print(f"website {website} request threw an error")
