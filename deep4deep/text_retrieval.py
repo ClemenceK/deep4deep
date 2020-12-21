@@ -29,18 +29,22 @@ def prepare_my_df(df):
     NLP_useful_columns = ['id', 'name', 'tagline', 'url', 'website_url', 'target']
     my_df = df[NLP_useful_columns].copy()
 
-    my_df.set_index('id', inplace=True)
+    #my_df.set_index('id', inplace=True)
+
+    # drop duplicates
+    duplicate_ids_to_drop = [894833,1787891,892048,1742837]
+    # corwave, lalilo, pixyl, tricares
 
     # drop a problematic line (the first one: scrapings returns junk text instead of error;
     # for all others, just no or French data but no big deal if they stay)
     problematic_ids_to_drop = [969633, 971808, 31373, 1742840, 1660559, 1836530,
     227608, 933434, 1831991,1834603, 217428,1836415, 1742840, 1834791, 1466670,
     1817120, 1836255, 1836503,1921970,1891276, 906637, 198955, 1738965, 1855449,
-    1787891, 1800559, 1836943, 1834666, 1835159, 1835167, 1835172, 1801785, 1836114,
+    1800559, 1836943, 1834666, 1835159, 1835167, 1835172, 1801785, 1836114,
     1836371, 1836433, 1836530, 1832864, 968692, 1836470, 1836474, 894898, 908848,
     1836732, 1463619, 144370, 1836822, 1800595, 1837085, 1837166, 1987283]
 
-    for i in problematic_ids_to_drop:
+    for i in problematic_ids_to_drop+duplicate_ids_to_drop:
         try:
             my_df.drop(index=[], inplace=True)
         except:
@@ -60,7 +64,11 @@ def get_meta_description(row):
     website = row['website_url']
     # disabling warning for SSL vertificate, printing a note instead
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-    # ⚠️⚠️⚠️ We don't think there is a securoty issue in this scraping, but if you disagree, remove these lines.
+    # ⚠️⚠️⚠️ We don't think there is a security issue in this scraping,
+    # because the addresses come from Dealroom (a site cannot "ask you" to scrape it),
+    # no information is shared by us in this connection,
+    # and quite a few young sites don't have SSLs indeed.
+    # but if you disagree, remove the first "except" below.
     try:
         try :
             response = requests.get(website)
@@ -82,6 +90,10 @@ def get_meta_description(row):
         description = " "
     return description # to be added in 'meta_description' column by get_meta_description_columns
 
+    # Note: I wonder if we could add text that describes the error.
+    # Is there any relationship between eg not having a SSL certificate and being
+    # a deeptech, eg not worrying about visitors because of slow TTM, or
+    # not being best at webdev tech?
 
 #@simple_time_tracker
 def get_meta_description_columns(my_df, save_file_name="my_df_with_metatags.csv"):

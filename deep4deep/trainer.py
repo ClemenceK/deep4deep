@@ -115,6 +115,7 @@ def main_trainer():
     using its own set of text data (./raw_data/)
     based on the my_df_with_metatags.csv file.
     Can be used to re-train the model on an updated set of data.
+    Alternatively, use the "training_the_model" notebook
     '''
 
     # data preparation
